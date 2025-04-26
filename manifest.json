@@ -1,0 +1,17 @@
+{
+  "manifest_version": 3,
+  "name": "Lyrically",
+  "version": "1.0",
+  "permissions": ["tabs", "scripting"],
+  "content_scripts": [
+    {
+      "matches": ["*://www.youtube.com/watch*"],
+      "js": ["content.js"],
+      "css": ["styles.css"]
+    }
+  ],
+  "host_permissions": ["https://api.genius.com/*"],
+  "action": {
+    "default_popup": "popup.html"
+  }
+}
