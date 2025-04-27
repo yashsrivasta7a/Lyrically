@@ -4,9 +4,10 @@
 <p align="center">
   <img src="./icons/icon.png" alt="Lyrically Demo Preview" width="300">
 </p>
-<p align="center"><i>Check out the <a href="./Demo.mp4">demo video</a> to see Lyrically in action</i></p>
-The demo shows how the extension automatically detects songs on YouTube and overlays lyrics directly on the video player for a seamless viewing experience.
-
+<p align="center">
+  <video src="./Demo.mp4" width="600" autoplay loop ></video>
+</p>
+<p align="center"><i>Lyrically in action: automatically detecting songs and overlaying lyrics</i></p>
 ## 📖 Overview
 
 Lyrically is a Chrome Extension that enhances your YouTube music experience by displaying song lyrics directly on the video player. No more switching between tabs or interrupting your listening session!
