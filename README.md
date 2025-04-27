@@ -1,61 +1,88 @@
-# Lyrically🎵✨
+# Lyrically 🎵✨
 
-## Problem
-Many people love listening to music on YouTube, but when they want to view the lyrics, they have to open a separate tab or window. This causes distractions and interrupts the listening experience.
+🎬 Demo
+<p align="center">
+  <img src="./icons/icon.png" alt="Lyrically Demo Preview" width="600">
+</p>
+<p align="center"><i>Check out the <a href="./demo.mp4">demo video</a> to see Lyrically in action</i></p>
+The demo shows how the extension automatically detects songs on YouTube and overlays lyrics directly on the video player for a seamless viewing experience.
 
-## Solution
-**YouTube Lyrics Overlay** is a simple Chrome Extension that automatically fetches the lyrics of the currently playing YouTube song and displays them transparently over the video itself.  
-No need to switch tabs — enjoy a seamless, immersive experience where the lyrics flow along with your music.
+## 📖 Overview
 
-## Features
-- 🔎 Automatically fetches lyrics based on the current YouTube video.
-- 🖼️ Displays lyrics as an elegant transparent overlay on top of the video.
-- 🎨 Minimal and non-intrusive design.
-- ⚡ Fast and easy setup.
-<<<<<<< HEAD
-=======
+Lyrically is a Chrome Extension that enhances your YouTube music experience by displaying song lyrics directly on the video player. No more switching between tabs or interrupting your listening session!
 
----
+## 🔍 The Problem
 
-## Setup & Running Instructions
+When listening to music on YouTube, viewers often want to follow along with the lyrics. Traditionally, this requires opening a separate tab or window to search for lyrics, which disrupts the viewing experience.
 
-This project consists of a Chrome Extension and a backend Node.js server that fetches the lyrics for the currently playing YouTube song. PM2 is used to manage the server.
+## 💡 Our Solution
 
-### 1. **Clone the Repository**
+**Lyrically** seamlessly integrates lyrics into your YouTube experience by:
+- Automatically detecting the currently playing song
+- Fetching the corresponding lyrics
+- Displaying them as an elegant overlay directly on the video player
 
-Clone the repository to your local machine:
+## ✨ Key Features
 
+- 🎯 **Automatic Detection** - Intelligently identifies the current song from YouTube metadata
+- 🌟 **Elegant Overlay** - Non-intrusive transparent lyrics display over your video
+- 🎨 **Minimalist Design** - Clean interface that doesn't distract from the music
+- ⚡ **Lightweight** - Fast performance with minimal resource usage
+- 🛠️ **Easy Setup** - Simple installation and configuration
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Node.js
+- npm
+- Chrome browser
+- A Genius API key
+
+### Installation
+
+#### 1. Clone the Repository
 ```bash
 git clone https://github.com/yashsrivasta7a/Lyrically.git
 cd Lyrically/backend
 ```
-### 2. **PM2**: Install it globally using npm:
 
-   ```bash
-   npm install pm2 -g
-   ```
----
+#### 2. Install PM2 Globally
+```bash
+npm install pm2 -g
+```
 
-### 3. Install node using npm:
+#### 3. Install Dependencies
+```bash
+npm install
+```
 
-   ```bash
-   npm install
-   node server.js
-   ```
----
+#### 4. Configure Genius API Token
 
+1. Visit [Genius API Clients](https://genius.com/api-clients)
+2. Create a new API client and obtain your access token
+3. Create .env file and paste your 
+```bash
+Genius_Token = YOUR_API_KEY;
+```
 
-### 5. ## Automated Script for Easy PM2 Setup
+## 🖥️ Running the Server
 
-To make it easier to start and manage your Node.js server with PM2, you can use the following script. This script will automatically start your Node.js application and set up PM2 to resurrect it after a system reboot.
+### Option A: One-Time Run
+For temporary usage:
+```bash
+node server.js
+```
 
-### Script:
+### Option B: Persistent Server with PM2
+For always-on operation that survives system restarts:
+
+1. **Create a startup script** (save as `setup-pm2.ps1`):
 
 ```powershell
 $NodeExePath = "C:\Program Files\nodejs\node.exe"
 $Pm2ResurrectCmd = "C:\Users\$env:USERNAME\AppData\Roaming\npm\node_modules\pm2\bin\pm2 resurrect"
 $TaskName = "PM2_Resurrect"
-$ServerJsPath = "D:\Code\Lyrically\Backend\server.js"  <------------- Update with your actual path ------------->
+$ServerJsPath = "$PWD\server.js"  # Uses current directory
 
 Write-Host "Starting your Node.js server with PM2..."
 pm2 start $ServerJsPath
@@ -70,25 +97,34 @@ $Principal = New-ScheduledTaskPrincipal -UserId $env:USERNAME -RunLevel Highest
 
 Register-ScheduledTask -Action $Action -Trigger $Trigger -Principal $Principal -TaskName $TaskName -Description "Resurrect PM2 processes at user login" -Force
 
-Write-Host "All done! Your Node.js server will now restart automatically after reboot."
+Write-Host "✅ Setup complete! Your server will automatically restart after system reboots."
 ```
 
-### How to Run the Script:
-1. Open **PowerShell** as Administrator.
-2. paste the above command in the PowerShell
-3. You're Good to go
+2. **Run the script** with Administrator privileges:
+```powershell
+powershell -ExecutionPolicy Bypass -File setup-pm2.ps1
+```
 
-This will:
-- Start your Node.js app with PM2.
-- Save the process list.
-- Set up a scheduled task to restart the app after a system reboot.
+## 🔄 Quick Reference
 
----
+| Operation | Command |
+|-----------|---------|
+| Start server (one-time) | `node server.js` |
+| Start with PM2 | `pm2 start server.js` |
+| Check PM2 processes | `pm2 list` |
+| Stop PM2 server | `pm2 stop server` |
+| View logs | `pm2 logs` |
 
-## Conclusion
+## 🤝 Contributing
 
-By using **PM2**, you can efficiently manage your Node.js application, ensuring it runs smoothly and automatically restarts after reboots. The **YouTube Lyrics Overlay** Chrome Extension provides an easy way to enjoy music with synchronized lyrics, making for a seamless listening experience.
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-Feel free to adjust the scripts and configurations based on your needs. If you have any questions, feel free to open an issue or contact me!
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
+## 📝 License
 
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
