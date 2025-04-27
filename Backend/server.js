@@ -58,6 +58,18 @@ function extractTextRecursively(node) {
 
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 
+// Update selectors for Genius lyrics
+const LYRICS_SELECTORS = [
+    '[class^="Lyrics__Container"]',
+    '[data-lyrics-container="true"]',
+    '[class*="LyricsPlaceholder__Container"]',
+    '.lyrics',
+    // Modern Genius selectors
+    '[class*="lyrics"]',
+    '.SongPageGriddesktop__TwoColumn-sc-1px5b71-0',
+    '.Lyrics__Root-sc-1ynbvzw-1'
+];
+
 async function fetchWithRetry(url, options, retries = 3) {
     const cacheKey = url + JSON.stringify(options);
     
@@ -84,9 +96,13 @@ async function fetchWithRetry(url, options, retries = 3) {
                     'Accept-Encoding': 'gzip, deflate, br',
                     'Connection': 'keep-alive',
                     'Cache-Control': 'no-cache',
-                    'Pragma': 'no-cache'
+                    'Pragma': 'no-cache',
+                    'Referer': 'https://genius.com/'
                 },
-                timeout: 15000
+                timeout: 15000,
+                validateStatus: function (status) {
+                    return status >= 200 && status < 500;
+                }
             };
 
             if (proxy) {
@@ -103,7 +119,12 @@ async function fetchWithRetry(url, options, retries = 3) {
             
             return response;
         } catch (error) {
-            console.error(`Attempt ${i + 1} failed:`, error.message);
+            console.error(`Attempt ${i + 1} failed for URL ${url}:`, {
+                message: error.message,
+                status: error.response?.status,
+                statusText: error.response?.statusText,
+                headers: error.response?.headers
+            });
             
             if (error.response?.status === 403) {
                 // Try different proxy on next attempt
@@ -123,8 +144,14 @@ app.get("/lyrics", async (req, res) => {
         return res.status(400).json({ error: "Song title is required" });
     }
 
+    if (!GENIUS_ACCESS_TOKEN) {
+        console.error("Genius API token not configured");
+        return res.status(500).json({ error: "Lyrics service configuration error" });
+    }
+
     try {
         // Search for lyrics
+        console.log(`Searching for lyrics: "${song}"`);
         const searchResponse = await fetchWithRetry(
             `https://api.genius.com/search?q=${encodeURIComponent(song)}`,
             {
@@ -134,30 +161,30 @@ app.get("/lyrics", async (req, res) => {
             }
         );
 
+        if (!searchResponse.data?.response) {
+            console.error("Invalid Genius API response:", searchResponse.data);
+            return res.status(500).json({ error: "Invalid response from lyrics service" });
+        }
+
         const hits = searchResponse.data.response.hits;
         if (hits.length > 0) {
             const songPath = hits[0].result.path;
             const lyricsPageUrl = `https://genius.com${songPath}`;
             
-            // Add small delay between requests
+            console.log(`Found song, fetching lyrics from: ${lyricsPageUrl}`);
             await delay(1000);
             
             const lyricsPageResponse = await fetchWithRetry(lyricsPageUrl, {});
             const dom = new JSDOM(lyricsPageResponse.data);
             const document = dom.window.document;
 
-            // Try multiple selector patterns
-            const selectors = [
-                ".Lyrics__Container-sc-78fb6627-1",
-                "[class*='Lyrics__Container']",
-                "[class*='lyrics']",
-                ".lyrics"
-            ];
-
             let lyricsContainers = [];
-            for (const selector of selectors) {
+            for (const selector of LYRICS_SELECTORS) {
                 lyricsContainers = document.querySelectorAll(selector);
-                if (lyricsContainers.length > 0) break;
+                if (lyricsContainers.length > 0) {
+                    console.log(`Found lyrics using selector: ${selector}`);
+                    break;
+                }
             }
 
             if (lyricsContainers.length > 0) {
@@ -172,13 +199,29 @@ app.get("/lyrics", async (req, res) => {
                     .replace(/\n\s*\n\s*\n/g, '\n\n')
                     .trim();
 
+                if (!lyrics) {
+                    console.error("Lyrics extraction resulted in empty string");
+                    return res.status(404).json({ error: "Could not extract lyrics from page" });
+                }
+
+                console.log(`Successfully fetched lyrics for: "${song}"`);
                 return res.json({ lyrics });
             }
+            
+            console.error("No lyrics containers found on page");
             return res.status(404).json({ error: "Lyrics not found on page" });
         }
+        
+        console.log(`No results found for song: "${song}"`);
         return res.status(404).json({ error: "Song not found" });
     } catch (error) {
-        console.error("Error fetching lyrics:", error.message);
+        console.error("Error fetching lyrics:", {
+            song,
+            error: error.message,
+            stack: error.stack,
+            response: error.response?.data
+        });
+        
         let errorMessage = "Failed to fetch lyrics";
         let statusCode = 500;
 
@@ -189,6 +232,9 @@ app.get("/lyrics", async (req, res) => {
             } else if (error.response.status === 429) {
                 errorMessage = "Too many requests. Please try again later.";
                 statusCode = 429;
+            } else if (error.response.status === 401) {
+                errorMessage = "Invalid or expired API token";
+                statusCode = 401;
             }
         }
 
