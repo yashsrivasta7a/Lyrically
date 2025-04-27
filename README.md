@@ -2,9 +2,9 @@
 
 🎬 Demo
 <p align="center">
-  <img src="./icons/icon.png" alt="Lyrically Demo Preview" width="600">
+  <img src="./icons/icon.png" alt="Lyrically Demo Preview" width="300">
 </p>
-<p align="center"><i>Check out the <a href="./demo.mp4">demo video</a> to see Lyrically in action</i></p>
+<p align="center"><i>Check out the <a href="./Demo.mp4">demo video</a> to see Lyrically in action</i></p>
 The demo shows how the extension automatically detects songs on YouTube and overlays lyrics directly on the video player for a seamless viewing experience.
 
 ## 📖 Overview
