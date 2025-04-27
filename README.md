@@ -1,13 +1,7 @@
 # Lyrically 🎵✨
 
-🎬 Demo
-<p align="center">
-  <img src="./icons/icon.png" alt="Lyrically Demo Preview" width="300">
-</p>
-<p align="center">
-  <video src="Demo.mp4" width="600" autoplay loop ></video>
-</p>
-<p align="center"><i>Lyrically in action: automatically detecting songs and overlaying lyrics</i></p>
+
+![🎬 Lyrically Demo](https://github.com/yashsrivasta7a/Lyrically/raw/main/Demo.mp4)  
 
 ## 🔍 The Problem
 
