@@ -36,19 +36,15 @@ cd Lyrically/backend
    ```
 ---
 
+
 ### 3. Install node using npm:
 
    ```bash
-   npm install pm2 -g
-   ```
----
-
-### 4. Run the server:
-
-   ```bash
+   npm install
    node server.js
    ```
 ---
+
 
 ### 5. ## Automated Script for Easy PM2 Setup
 
