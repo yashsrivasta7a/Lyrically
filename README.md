@@ -26,7 +26,7 @@ Clone the repository to your local machine:
 
 ```bash
 git clone https://github.com/yashsrivasta7a/Lyrically.git
-cd Lyrically
+cd Lyrically/backend
 ```
 ### 2. **PM2**: Install it globally using npm:
 
