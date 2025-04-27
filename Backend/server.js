@@ -9,7 +9,7 @@ const PORT = 3000;
 
 app.use(cors());
 
-const GENIUS_ACCESS_TOKEN = "-FkO8rYRyqgxaNwQl_9XfBu5gnodKQGNKVEHx7TH59K_5x3W0HOlc-sJdxWdNxju";
+const GENIUS_ACCESS_TOKEN = process.env.Genius_Token;
 
 function extractTextRecursively(node) {
 	if (node.nodeName === "BR") {
