@@ -35,7 +35,21 @@ cd Lyrically
    ```
 ---
 
-### 3. ## Automated Script for Easy PM2 Setup
+### 3. Install node using npm:
+
+   ```bash
+   npm install pm2 -g
+   ```
+---
+
+### 4. Run the server:
+
+   ```bash
+   node server.js
+   ```
+---
+
+### 5. ## Automated Script for Easy PM2 Setup
 
 To make it easier to start and manage your Node.js server with PM2, you can use the following script. This script will automatically start your Node.js application and set up PM2 to resurrect it after a system reboot.
 
