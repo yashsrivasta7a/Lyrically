@@ -42,7 +42,7 @@ const songTitle = () => {
 
 const fetchLyrics = async (song) => {
   try {
-    const backendUrl = `https://lyrically-backend.onrender.com/lyrics?song=${encodeURIComponent(song)}`;
+    const backendUrl = `https://lyrically-q758.onrender.com/lyrics?song=${encodeURIComponent(song)}`;
     console.log(backendUrl);
 
     const response = await fetch(backendUrl);

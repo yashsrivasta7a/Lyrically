@@ -8,6 +8,9 @@ const app = express();
 const PORT = 3000;
 
 app.use(cors());
+
+const GENIUS_ACCESS_TOKEN = process.env.Genius_Token;
+
 function extractTextRecursively(node) {
 	if (node.nodeName === "BR") {
 		return "\n";
