@@ -34,7 +34,8 @@ app.get("/lyrics", async (req, res) => {
 				Authorization: `Bearer ${GENIUS_ACCESS_TOKEN}`,
 			},
 		});
-
+		console.log(GENIUS_ACCESS_TOKEN);
+		
 		const hits = response.data.response.hits;
 		if (hits.length > 0) {
 			const songPath = hits[0].result.path;
@@ -73,6 +74,4 @@ app.get("/lyrics", async (req, res) => {
 	}
 });
 
-app.listen(PORT, () => {
-	console.log(`Server is running on http://localhost:${PORT}`);
-});
+app.listen();
