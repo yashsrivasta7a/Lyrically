@@ -35,7 +35,7 @@ cd Lyrically
 
 To make it easier to start and manage your Node.js server with PM2, you can use the following script. This script will automatically start your Node.js application and set up PM2 to resurrect it after a system reboot.
 
-### Script: `start-pm2.ps1`
+### Script:
 
 ```powershell
 # === Variables to adjust ===
