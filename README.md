@@ -36,7 +36,6 @@ cd Lyrically/backend
    ```
 ---
 
-
 ### 3. Install node using npm:
 
    ```bash
