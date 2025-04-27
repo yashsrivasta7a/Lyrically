@@ -1,7 +1,7 @@
 # Lyrically 🎵✨
 
 
-![🎬 Lyrically Demo](https://github.com/yashsrivasta7a/Lyrically/raw/main/Demo.gif)  
+![🎬 Lyrically Demo](https://github.com/yashsrivasta7a/Lyrically/raw/main/demo.gif)  
 
 ## 🔍 The Problem
 
