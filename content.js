@@ -7,12 +7,16 @@ chatbot.innerHTML = `
 document.body.appendChild(chatbot);
 
 const songTitle = () => {
-	const title = document.title
-		.replace(" - YouTube", "")
-		.replace(/\(.*?\)/g, "")
-		.trim();
-		console.log(title);
-	return title;
+    const title = document.title
+        .replace(" - YouTube", "")
+        .replace(/\s*\[[^\]]*\]/g, "") // remove content in square brackets
+        .replace(/\s*\([^)]*\)/g, "") // remove content in parentheses
+        .replace(/\s*(?:ft\.|feat\.|featuring).*$/i, "") // remove featuring artists
+        .replace(/\s*-\s*(Live|Official|Music Video|Audio|Performance|One Night Only).*$/i, "") // remove video types
+        .replace(/\s+/g, " ") // normalize spaces
+        .trim();
+    console.log(title);
+    return title;
 };
 
 const fetchLyrics = async (song) => {
@@ -57,4 +61,4 @@ setInterval(() => {
 		
 		fetchLyrics(currentSong);
 	}
-}, 1000); 
+}, 1000);
