@@ -28,7 +28,7 @@ const songTitle = () => {
     .replace(/\s*\([^)]*\)/g, "") // remove content in parentheses
     .replace(/\s*(?:ft\.|feat\.|featuring).*$/i, "") // remove featuring artists
     .replace(
-      /\s*-\s*(Live|Official|Music Video|Audio|Performance|One Night Only).*$/i,
+      /\s*-\s*(Live|Official|Music Video|Audio|Performance|One Night Only|Lyrical Video|-|).*$/i,
       ""
     ) // remove video types
     .replace(/\s*[\/\\|]+.*$/g, "") // remove everything after /, \, or |
