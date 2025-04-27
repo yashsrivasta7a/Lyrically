@@ -43,27 +43,38 @@ const songTitle = () => {
 const fetchLyrics = async (song) => {
   try {
     const backendUrl = `https://lyrically-q758.onrender.com/lyrics?song=${encodeURIComponent(song)}`;
-    console.log(backendUrl);
+    console.log("Fetching lyrics for:", song);
 
-    const response = await fetch(backendUrl);
+    const response = await fetch(backendUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0',
+        'Accept': 'application/json',
+        'Origin': 'https://www.youtube.com'
+      }
+    });
+
+    if (response.status === 403) {
+      throw new Error("Access to lyrics API is restricted. Please try again later.");
+    }
 
     if (!response.ok) {
-      throw new Error("Failed to fetch lyrics");
+      throw new Error(`Failed to fetch lyrics (${response.status})`);
     }
 
     const data = await response.json();
-    console.log(data);
+    console.log("Lyrics data received:", data);
 
     if (data.lyrics) {
       document.getElementById("lyricsContent").innerText = data.lyrics;
-      console.log(data.lyrics);
     } else {
       document.getElementById("lyricsContent").innerText = "Lyrics Not Found";
     }
   } catch (error) {
     console.error("Error fetching lyrics:", error);
-    document.getElementById("lyricsContent").innerText =
-      "Failed to load lyrics.";
+    document.getElementById("lyricsContent").innerText = 
+      error.message === "Access to lyrics API is restricted. Please try again later."
+        ? "Sorry, lyrics service is temporarily unavailable. Please try again later."
+        : "Failed to load lyrics.";
   }
 };
 

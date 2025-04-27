@@ -5,75 +5,127 @@ const axios = require("axios");
 const { JSDOM } = require("jsdom");
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 
 const GENIUS_ACCESS_TOKEN = process.env.Genius_Token;
 
+// Rotating User-Agents to prevent blocking
+const USER_AGENTS = [
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Edge/91.0.864.59 Safari/537.36',
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:89.0) Gecko/20100101 Firefox/89.0'
+];
+
+function getRandomUserAgent() {
+    return USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
+}
+
 function extractTextRecursively(node) {
-	if (node.nodeName === "BR") {
-		return "\n";
-	} else if (node.nodeType === 3) { // Text node
-		return node.textContent;
-	} else if (node.nodeType === 1) { // Element node
-		return Array.from(node.childNodes).map(extractTextRecursively).join("");
-	}
-	return "";
+    if (node.nodeName === "BR") {
+        return "\n";
+    } else if (node.nodeType === 3) { // Text node
+        return node.textContent;
+    } else if (node.nodeType === 1) { // Element node
+        return Array.from(node.childNodes).map(extractTextRecursively).join("");
+    }
+    return "";
+}
+
+const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+async function fetchWithRetry(url, options, retries = 3) {
+    for (let i = 0; i < retries; i++) {
+        try {
+            const response = await axios(url, {
+                ...options,
+                headers: {
+                    ...options.headers,
+                    'User-Agent': getRandomUserAgent(),
+                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                    'Accept-Language': 'en-US,en;q=0.5',
+                    'Accept-Encoding': 'gzip, deflate, br',
+                    'Connection': 'keep-alive',
+                    'Cache-Control': 'no-cache',
+                    'Pragma': 'no-cache'
+                },
+                timeout: 10000
+            });
+            return response;
+        } catch (error) {
+            if (i === retries - 1) throw error;
+            await delay(1000 * (i + 1)); // Exponential backoff
+        }
+    }
 }
 
 app.get("/lyrics", async (req, res) => {
-	const { song } = req.query;
-	if (!song) {
-		return res.status(400).json({ error: "Song title is required" });
-	}
+    const { song } = req.query;
+    if (!song) {
+        return res.status(400).json({ error: "Song title is required" });
+    }
 
-	try {
-		const response = await axios.get(`https://api.genius.com/search?q=${encodeURIComponent(song)}`, {
-			headers: {
-				Authorization: `Bearer ${GENIUS_ACCESS_TOKEN}`,
-			},
-		});
-		
-		console.log(GENIUS_ACCESS_TOKEN);
-		const hits = response.data.response.hits;
-		if (hits.length > 0) {
-			const songPath = hits[0].result.path;
-			const lyricsPageUrl = `https://genius.com${songPath}`;
-			const lyricsPageResponse = await axios.get(lyricsPageUrl);
-			const dom = new JSDOM(lyricsPageResponse.data);
-			const document = dom.window.document;
+    try {
+        // Search for lyrics
+        const searchResponse = await fetchWithRetry(
+            `https://api.genius.com/search?q=${encodeURIComponent(song)}`,
+            {
+                headers: {
+                    Authorization: `Bearer ${GENIUS_ACCESS_TOKEN}`,
+                }
+            }
+        );
 
-			const lyricsContainers = document.querySelectorAll(".Lyrics__Container-sc-78fb6627-1");
+        const hits = searchResponse.data.response.hits;
+        if (hits.length > 0) {
+            const songPath = hits[0].result.path;
+            const lyricsPageUrl = `https://genius.com${songPath}`;
+            
+            const lyricsPageResponse = await fetchWithRetry(lyricsPageUrl, {});
+            const dom = new JSDOM(lyricsPageResponse.data);
+            const document = dom.window.document;
 
-			if (lyricsContainers.length > 0) {
-				let lyrics = "";
-				lyricsContainers.forEach(container => {
-					const unwantedHeaders = container.querySelectorAll(".StyledLink-sc-15c685a-0.kXMQlY.SongBioPreview__Wrapper-sc-f77d3c56-1.fIYpKy");
-					unwantedHeaders.forEach(el => el.remove());
-					lyrics += extractTextRecursively(container) + "\n\n";
-				});
+            // Try multiple selector patterns to find lyrics
+            const selectors = [
+                ".Lyrics__Container-sc-78fb6627-1",
+                "[class*='Lyrics__Container']",
+                "[class*='lyrics']",
+                ".lyrics"
+            ];
 
-				lyrics = lyrics
-					.replace(/\d+\s*Contributors.*?Lyrics/g, '') // Remove contributor text
-					.replace(/\d+\s*Contributors.*?Lyrics/g, '') // Remove contributor text
-					.replace(/\[.*?\]/g, '') // Remove bracketed text
-					.replace(/\n\s*\n\s*\n/g, '\n\n') // Clean up extra newlines
-					.trim();
+            let lyricsContainers = [];
+            for (const selector of selectors) {
+                lyricsContainers = document.querySelectorAll(selector);
+                if (lyricsContainers.length > 0) break;
+            }
 
-				return res.json({ lyrics });
-			} else {
-				return res.status(404).json({ error: "Lyrics not found on Genius page" });
-			}
-		} else {
-			return res.status(404).json({ error: "Lyrics not found" });
-		}
-	} catch (error) {
-		console.error("Error fetching lyrics:", error.message);
-		return res.status(500).json({ error: "Failed to fetch lyrics" });
-	}
+            if (lyricsContainers.length > 0) {
+                let lyrics = "";
+                lyricsContainers.forEach(container => {
+                    lyrics += extractTextRecursively(container) + "\n\n";
+                });
+
+                lyrics = lyrics
+                    .replace(/\d+\s*Contributors.*?Lyrics/g, '')
+                    .replace(/\[.*?\]/g, '')
+                    .replace(/\n\s*\n\s*\n/g, '\n\n')
+                    .trim();
+
+                return res.json({ lyrics });
+            }
+            return res.status(404).json({ error: "Lyrics not found on page" });
+        }
+        return res.status(404).json({ error: "Song not found" });
+    } catch (error) {
+        console.error("Error fetching lyrics:", error.message);
+        const errorMessage = error.response?.status === 403 
+            ? "Access temporarily restricted. Try again later."
+            : "Failed to fetch lyrics";
+        return res.status(error.response?.status || 500).json({ error: errorMessage });
+    }
 });
 
 app.listen(PORT, () => {
-	console.log(`Server is running on http://localhost:${PORT}`);
+    console.log(`Server is running on port ${PORT}`);
 });
