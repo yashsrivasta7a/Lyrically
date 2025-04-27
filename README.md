@@ -1,5 +1,5 @@
 
-# YouTube Lyrics Overlay 🎵✨
+# Lyrically🎵✨
 
 ## Problem
 Many people love listening to music on YouTube, but when they want to view the lyrics, they have to open a separate tab or window. This causes distractions and interrupts the listening experience.
