@@ -3,23 +3,46 @@ const express = require("express");
 const cors = require("cors");
 const axios = require("axios");
 const { JSDOM } = require("jsdom");
+const rateLimit = require('express-rate-limit');
+const HttpsProxyAgent = require('https-proxy-agent');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Rate limiting configuration
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100 // limit each IP to 100 requests per windowMs
+});
+
 app.use(cors());
+app.use(limiter);
 
 const GENIUS_ACCESS_TOKEN = process.env.Genius_Token;
 
-// Rotating User-Agents to prevent blocking
+// Proxy configuration - Add multiple proxies if available
+const PROXIES = process.env.PROXIES ? process.env.PROXIES.split(',') : [];
+let currentProxyIndex = 0;
+
+// Rotating User-Agents
 const USER_AGENTS = [
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Edge/91.0.864.59 Safari/537.36',
-    'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:89.0) Gecko/20100101 Firefox/89.0'
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:89.0) Gecko/20100101 Firefox/89.0',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
 ];
+
+// Cache implementation
+const cache = new Map();
+const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
 
 function getRandomUserAgent() {
     return USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
+}
+
+function getNextProxy() {
+    if (PROXIES.length === 0) return null;
+    currentProxyIndex = (currentProxyIndex + 1) % PROXIES.length;
+    return PROXIES[currentProxyIndex];
 }
 
 function extractTextRecursively(node) {
@@ -36,9 +59,22 @@ function extractTextRecursively(node) {
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 async function fetchWithRetry(url, options, retries = 3) {
+    const cacheKey = url + JSON.stringify(options);
+    
+    // Check cache first
+    if (cache.has(cacheKey)) {
+        const cached = cache.get(cacheKey);
+        if (Date.now() - cached.timestamp < CACHE_TTL) {
+            return cached.data;
+        } else {
+            cache.delete(cacheKey);
+        }
+    }
+
     for (let i = 0; i < retries; i++) {
         try {
-            const response = await axios(url, {
+            const proxy = getNextProxy();
+            const axiosConfig = {
                 ...options,
                 headers: {
                     ...options.headers,
@@ -50,12 +86,33 @@ async function fetchWithRetry(url, options, retries = 3) {
                     'Cache-Control': 'no-cache',
                     'Pragma': 'no-cache'
                 },
-                timeout: 10000
+                timeout: 15000
+            };
+
+            if (proxy) {
+                axiosConfig.httpsAgent = new HttpsProxyAgent(proxy);
+            }
+
+            const response = await axios(url, axiosConfig);
+            
+            // Cache successful response
+            cache.set(cacheKey, {
+                data: response,
+                timestamp: Date.now()
             });
+            
             return response;
         } catch (error) {
+            console.error(`Attempt ${i + 1} failed:`, error.message);
+            
+            if (error.response?.status === 403) {
+                // Try different proxy on next attempt
+                await delay(2000 * (i + 1)); // Exponential backoff
+                continue;
+            }
+            
             if (i === retries - 1) throw error;
-            await delay(1000 * (i + 1)); // Exponential backoff
+            await delay(1000 * (i + 1));
         }
     }
 }
@@ -82,11 +139,14 @@ app.get("/lyrics", async (req, res) => {
             const songPath = hits[0].result.path;
             const lyricsPageUrl = `https://genius.com${songPath}`;
             
+            // Add small delay between requests
+            await delay(1000);
+            
             const lyricsPageResponse = await fetchWithRetry(lyricsPageUrl, {});
             const dom = new JSDOM(lyricsPageResponse.data);
             const document = dom.window.document;
 
-            // Try multiple selector patterns to find lyrics
+            // Try multiple selector patterns
             const selectors = [
                 ".Lyrics__Container-sc-78fb6627-1",
                 "[class*='Lyrics__Container']",
@@ -119,11 +179,26 @@ app.get("/lyrics", async (req, res) => {
         return res.status(404).json({ error: "Song not found" });
     } catch (error) {
         console.error("Error fetching lyrics:", error.message);
-        const errorMessage = error.response?.status === 403 
-            ? "Access temporarily restricted. Try again later."
-            : "Failed to fetch lyrics";
-        return res.status(error.response?.status || 500).json({ error: errorMessage });
+        let errorMessage = "Failed to fetch lyrics";
+        let statusCode = 500;
+
+        if (error.response) {
+            if (error.response.status === 403) {
+                errorMessage = "Access temporarily restricted. Retrying with different proxy...";
+                statusCode = 403;
+            } else if (error.response.status === 429) {
+                errorMessage = "Too many requests. Please try again later.";
+                statusCode = 429;
+            }
+        }
+
+        return res.status(statusCode).json({ error: errorMessage });
     }
+});
+
+// Health check endpoint
+app.get("/health", (req, res) => {
+    res.json({ status: "ok" });
 });
 
 app.listen(PORT, () => {
