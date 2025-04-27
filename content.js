@@ -9,6 +9,7 @@ document.body.appendChild(chatbot);
 const songTitle = () => {
     const title = document.title
         .replace(" - YouTube", "")
+        .replace(/^.*?\sx\s(.*?)\s*-/i, "$1 -") // keep only artist after 'x'
         .replace(/\s*\[[^\]]*\]/g, "") // remove content in square brackets
         .replace(/\s*\([^)]*\)/g, "") // remove content in parentheses
         .replace(/\s*(?:ft\.|feat\.|featuring).*$/i, "") // remove featuring artists
