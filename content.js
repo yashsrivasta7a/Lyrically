@@ -1,10 +1,25 @@
 const chatbot = document.createElement("div");
 chatbot.id = "lyricsBot";
 chatbot.innerHTML = `
-<div id="lyricsHeader">🎵 Lyrically 🎵</div>
+<div id="lyricsHeader">
+    🎵 Lyrically 🎵
+    <button id="minimizeBtn">−</button>
+</div>
 <div id="lyricsContent">Loading lyrics...</div>
 `;
 document.body.appendChild(chatbot);
+
+
+const minimizeBtn = document.getElementById('minimizeBtn');
+const lyricsContent = document.getElementById('lyricsContent');
+let isMinimized = false;
+
+minimizeBtn.addEventListener('click', () => {
+    isMinimized = !isMinimized;
+    lyricsContent.style.display = isMinimized ? 'none' : 'flex';
+    minimizeBtn.textContent = isMinimized ? '+' : '−';
+    // chatbot.classList.toggle('minimized');
+});
 
 const songTitle = () => {
     const title = document.title
