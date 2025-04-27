@@ -28,10 +28,14 @@ Clone the repository to your local machine:
 git clone https://github.com/yashsrivasta7a/Lyrically.git
 cd Lyrically
 ```
+### 2. **PM2**: Install it globally using npm:
 
+   ```bash
+   npm install pm2 -g
+   ```
 ---
 
-## Automated Script for Easy PM2 Setup
+### 3. ## Automated Script for Easy PM2 Setup
 
 To make it easier to start and manage your Node.js server with PM2, you can use the following script. This script will automatically start your Node.js application and set up PM2 to resurrect it after a system reboot.
 
