@@ -36,6 +36,7 @@ const songTitle = () => {
     .replace(/\s*\b\d{4}\b/g, "") // remove 4-digit years
     .replace(/\s+/g, " ") // normalize spaces
     .replace(/\b(full|audio|format|song with lyrics)\b/gi, "")
+    .replace(/@.*$/gm, '') // Remove @ and everything after it on each line
     .trim();
   console.log(title);
   return title;
