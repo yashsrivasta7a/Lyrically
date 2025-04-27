@@ -7,11 +7,9 @@
     {
       "matches": ["*://www.youtube.com/watch*"],
       "js": ["content.js"],
-      "css": ["styles.css"]
+      "css": ["style.css"]
     }
   ],
-  "host_permissions": ["https://api.genius.com/*"],
-  "action": {
-    "default_popup": "popup.html"
-  }
+  
+  "host_permissions": ["https://api.genius.com/*"]
 }
