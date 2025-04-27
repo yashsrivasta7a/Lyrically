@@ -1,4 +1,4 @@
-# YouTube Lyrics Overlay 🎵✨
+# Lyrically🎵✨
 
 ## Problem
 Many people love listening to music on YouTube, but when they want to view the lyrics, they have to open a separate tab or window. This causes distractions and interrupts the listening experience.
@@ -91,5 +91,4 @@ By using **PM2**, you can efficiently manage your Node.js application, ensuring 
 
 Feel free to adjust the scripts and configurations based on your needs. If you have any questions, feel free to open an issue or contact me!
 
----
->>>>>>> ccada8305cd732080db30adb8e0720994530fd3a
+
