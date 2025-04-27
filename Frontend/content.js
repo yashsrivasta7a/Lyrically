@@ -6,7 +6,6 @@ chatbot.innerHTML = `
     <button id="minimizeBtn">−</button>
 </div>
 <div id="lyricsContent">Loading lyrics...</div>
-<div id="lyricsSource"></div>
 `;
 document.body.appendChild(chatbot);
 
@@ -43,43 +42,28 @@ const songTitle = () => {
 
 const fetchLyrics = async (song) => {
   try {
-    const backendUrl = `https://lyrically-q758.onrender.com/lyrics?song=${encodeURIComponent(song)}`;
-    const lyricsContent = document.getElementById("lyricsContent");
-    const lyricsSource = document.getElementById("lyricsSource");
-    
-    console.log("Fetching lyrics for:", song);
-    lyricsContent.innerText = "Searching for lyrics...";
-    lyricsSource.innerText = "";
+    const backendUrl = `http://localhost:3000/lyrics?song=${encodeURIComponent(song)}`;
+    console.log(backendUrl);
 
-    const response = await fetch(backendUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0',
-        'Accept': 'application/json',
-        'Origin': 'https://www.youtube.com'
-      }
-    });
+    const response = await fetch(backendUrl);
 
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || `Failed to fetch lyrics (${response.status})`);
+      throw new Error("Failed to fetch lyrics");
     }
 
     const data = await response.json();
-    console.log("Lyrics data received:", data);
+    console.log(data);
 
     if (data.lyrics) {
-      lyricsContent.innerText = data.lyrics;
-      if (data.source) {
-        lyricsSource.innerText = `Source: ${data.source.charAt(0).toUpperCase() + data.source.slice(1)}`;
-      }
+      document.getElementById("lyricsContent").innerText = data.lyrics;
+      console.log(data.lyrics);
     } else {
-      lyricsContent.innerText = "Lyrics Not Found";
-      lyricsSource.innerText = "";
+      document.getElementById("lyricsContent").innerText = "Lyrics Not Found";
     }
   } catch (error) {
     console.error("Error fetching lyrics:", error);
-    document.getElementById("lyricsContent").innerText = error.message;
-    document.getElementById("lyricsSource").innerText = "";
+    document.getElementById("lyricsContent").innerText =
+      "Failed to load lyrics.";
   }
 };
 
