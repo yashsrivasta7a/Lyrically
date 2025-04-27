@@ -7,7 +7,20 @@ const { JSDOM } = require("jsdom");
 const app = express();
 const PORT = 3000;
 
-app.use(cors());
+const allowedOrigins = [
+	"https://www.youtube.com",
+	"chrome://extensions/?id=nihdlajnncdejpcjnjjjlkgmnbdboapc",
+  ];
+  
+  app.use(cors({
+	origin: function (origin, callback) {
+	  if (!origin || allowedOrigins.includes(origin)) {
+		callback(null, true);
+	  } else {
+		callback(new Error("Not allowed by CORS"));
+	  }
+	}
+  }));
 
 const GENIUS_ACCESS_TOKEN = process.env.Genius_Token;
 
