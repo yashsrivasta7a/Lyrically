@@ -35,7 +35,7 @@ const songTitle = () => {
     .replace(/\s*\/\/.*$/g, "") // remove everything after //
     .replace(/\s*\b\d{4}\b/g, "") // remove 4-digit years
     .replace(/\s+/g, " ") // normalize spaces
-    .replace(/\b(full|audio|format|official|new)\b/gi, "")
+    .replace(/\b(full|audio|format|song with lyrics)\b/gi, "")
     .trim();
   console.log(title);
   return title;
