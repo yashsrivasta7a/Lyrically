@@ -13,6 +13,9 @@ const songTitle = () => {
         .replace(/\s*\([^)]*\)/g, "") // remove content in parentheses
         .replace(/\s*(?:ft\.|feat\.|featuring).*$/i, "") // remove featuring artists
         .replace(/\s*-\s*(Live|Official|Music Video|Audio|Performance|One Night Only).*$/i, "") // remove video types
+        .replace(/\s*[\/\\|]+.*$/g, "") // remove everything after /, \, or |
+        .replace(/\s*\/\/.*$/g, "") // remove everything after //
+        .replace(/\s*\b\d{4}\b/g, "") // remove 4-digit years
         .replace(/\s+/g, " ") // normalize spaces
         .trim();
     console.log(title);
