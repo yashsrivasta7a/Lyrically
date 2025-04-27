@@ -9,7 +9,7 @@ const PORT = 3000;
 
 app.use(cors());
 
-// const GENIUS_ACCESS_TOKEN = process.env.Genius_Token;
+const GENIUS_ACCESS_TOKEN = "-FkO8rYRyqgxaNwQl_9XfBu5gnodKQGNKVEHx7TH59K_5x3W0HOlc-sJdxWdNxju";
 
 function extractTextRecursively(node) {
 	if (node.nodeName === "BR") {
@@ -31,7 +31,7 @@ app.get("/lyrics", async (req, res) => {
 	try {
 		const response = await axios.get(`https://api.genius.com/search?q=${encodeURIComponent(song)}`, {
 			headers: {
-				Authorization: `Bearer FkO8rYRyqgxaNwQl_9XfBu5gnodKQGNKVEHx7TH59K_5x3W0HOlc-sJdxWdNxju`,
+				Authorization: `Bearer ${GENIUS_ACCESS_TOKEN}`,
 			},
 		});
 
