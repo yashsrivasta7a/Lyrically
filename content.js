@@ -44,11 +44,10 @@ const songTitle = () => {
 
 const fetchLyrics = async (song) => {
   try {
-    const backendUrl = `http://localhost:3000/lyrics?song=${encodeURIComponent(song)}`;
+    const backendUrl = `http://localhost:4000/lyrics?song=${encodeURIComponent(song)}`;
     console.log(backendUrl);
 
-    const response = await fetch(backendUrl);
-
+    const response = await fetch(backendUrl);    
     if (!response.ok) {
       throw new Error("Failed to fetch lyrics");
     }
