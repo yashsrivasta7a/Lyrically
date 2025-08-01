@@ -1,6 +1,5 @@
 # Lyrically 🎵✨
 
-
 ![🎬 Lyrically Demo](https://github.com/yashsrivasta7a/Lyrically/raw/main/demo.gif)  
 
 ## 🔍 The Problem
@@ -19,8 +18,6 @@ When listening to music on YouTube, viewers often want to follow along with the 
 - 🎯 **Automatic Detection** - Intelligently identifies the current song from YouTube metadata
 - 🌟 **Elegant Overlay** - Non-intrusive transparent lyrics display over your video
 - 🎨 **Minimalist Design** - Clean interface that doesn't distract from the music
-- ⚡ **Lightweight** - Fast performance with minimal resource usage
-- 🛠️ **Easy Setup** - Simple installation and configuration
 
 ## 🚀 Getting Started
 
@@ -52,12 +49,12 @@ npm install
 
 1. Visit [Genius API Clients](https://genius.com/api-clients)
 2. Create a new API client and obtain your access token
-3. Create .env file and paste your 
+3. Create a `.env` file and add your token:
 ```bash
 Genius_Token = YOUR_API_KEY;
 ```
 
-## 🖥️ Running the Server
+## 💻 Running the Server
 
 ### Option A: One-Time Run
 For temporary usage:
@@ -96,6 +93,17 @@ Write-Host "✅ Setup complete! Your server will automatically restart after sys
 ```powershell
 powershell -ExecutionPolicy Bypass -File setup-pm2.ps1
 ```
+
+## 🧹 Setting Up the Chrome Extension
+
+Once your server is running, you can load the Chrome extension:
+
+1. Open **Chrome** and go to `chrome://extensions/`
+2. Turn **Developer mode** ON (toggle switch on the top right)
+3. Click **Load unpacked**
+4. Select the `extension` folder from the cloned **Lyrically** repository
+5. You're done! ✅  
+   Now when you open YouTube and play a song, **Lyrically** will display the lyrics overlay automatically.
 
 ## 🔄 Quick Reference
 
